@@ -1,10 +1,13 @@
 import React, { useState} from 'react'
-import { isEmpty } from 'lodash'
+import { isEmpty, size, throttle } from 'lodash'
 import shortid from 'shortid'
 
 function App() {
   const [task, settask] = useState("")
   const [tasks, settasks] = useState([])
+ const [edidMode, setedidMode] = useState(false)
+ const [id, setId] = useState("")
+
 
   const addTask= (e)=>{
     e.preventDefault()
@@ -17,10 +20,38 @@ return
       id: shortid.generate(),
       name: task
     }
-    settask([... task, newtask])
+    settasks([... tasks, newtask])
     settask("")
+    
 
   }
+
+  const saveTask= (e)=>{
+    e.preventDefault()
+    if (isEmpty(task)){
+console.log("task emty")
+return
+    }
+
+    //settask([... task, newtask])
+    setedidMode(false)
+    settask("")
+    setId("")
+    //console.log("settasks")
+
+  }
+
+const deleteTask = (id)=>{
+  const filterTasks = tasks.filter(task => task.id !== id) 
+  settasks(filterTasks)
+}
+
+const editTask =(theTask)=>{
+  settask(theTask.name)
+  setedidMode(true)
+  setId(id)
+  
+}
 
   return (
    <div className="container mt-5">
@@ -28,24 +59,51 @@ return
      <hr/>
      <div className = "row">
        <div className="col-8">
-         <h4 className="Text-center"> Task list </h4>
-         <ul className="list-group">
+         <h4 className = "text-center" > Task list </h4>
+
+         {
+           size(tasks) === 0 ?(
+           <h5 className= "text-center" > Aun  no Hay tareas programadas.</h5>
+           ):(
+
+          
+        <ul className="list-group">
 
            {
               tasks.map((task) =>(
-               <li className="list-group-item"  key={task.id}>
+               <li className="list-group-item" key={task.id}>
                <span className="lead"> {task.name}</span>
-               <button className="btn btn-danger btn-sm float-right mx-2"> delete </button>
-               <button className="btn btn-warning btn-sm float-right"> edit </button>
+
+               <button 
+               className="btn btn-danger btn-sm float-right mx-2"
+               onClick={()=> deleteTask(task.id)}
+               > 
+               delete 
+               </button>
+               <button
+                className="btn btn-warning btn-sm float-right"
+                onClick={()=> editTask(task.id)}
+               
+                >
+               edit
+               </button>
                </li>
              ))
            }
 
          </ul>
+           )
+
+        }  
+
        </div>
        <div className="col-4">
-       <h4 className="Text-center">Form</h4>
-       <form onSubmit={addTask}>
+
+       <h4 className="text-center">
+         {edidMode ? "task modify" : "Add Task"}
+         </h4>
+
+       <form onSubmit={ edidMode ? saveTask : addTask}>
          <input 
          type="text"
          className=" form-comtrol mb-2"
@@ -53,9 +111,9 @@ return
          onChange={(Text)=> settask(Text.target.value)}
          value={task}
          />
-         <button className="btn btn-dark btn-block"
+         <button className = { edidMode ? "btn btn-warning btn-block" : "btn btn-dark btn-block"}
          type="submit">
-           Add
+           { edidMode ? "save" : "add" }
            </button>
        </form>
          </div>
