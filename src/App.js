@@ -7,13 +7,24 @@ function App() {
   const [tasks, settasks] = useState([])
  const [edidMode, setedidMode] = useState(false)
  const [id, setId] = useState("")
+ const [error,seterror] = useState(null)
 
+
+ const validForm = () =>{
+   let isValid = true
+   seterror(null)
+
+  if (isEmpty(task)){
+      seterror("Debes ingresar una tarea")
+    isValid = false
+        }
+      return isValid  
+ }
 
   const addTask= (e)=>{
     e.preventDefault()
-    if (isEmpty(task)){
-console.log("task emty")
-return
+    if (!validForm()){
+      return
     }
 
     const newtask = {
@@ -28,11 +39,13 @@ return
 
   const saveTask= (e)=>{
     e.preventDefault()
-    if (isEmpty(task)){
-console.log("task emty")
-return
-    }
 
+    if (!validForm()){
+      return
+    }
+    
+    const editedatasks = tasks.map(item=> item.id === id ? {id, name: task} : item)
+    settasks(editedatasks)
     //settask([... task, newtask])
     setedidMode(false)
     settask("")
@@ -46,12 +59,11 @@ const deleteTask = (id)=>{
   settasks(filterTasks)
 }
 
-const editTask =(theTask)=>{
+const editTask = (theTask) => {
   settask(theTask.name)
   setedidMode(true)
-  setId(id)
-  
-}
+  setId(theTask.id)
+  }
 
   return (
    <div className="container mt-5">
@@ -63,7 +75,7 @@ const editTask =(theTask)=>{
 
          {
            size(tasks) === 0 ?(
-           <h5 className= "text-center" > Aun  no Hay tareas programadas.</h5>
+           <li className= "list-group-item" > Aun  no Hay tareas programadas.</li>
            ):(
 
           
@@ -104,6 +116,9 @@ const editTask =(theTask)=>{
          </h4>
 
        <form onSubmit={ edidMode ? saveTask : addTask}>
+         {
+           error && <span className ="text-danger mb-2">{error}</span>
+         }
          <input 
          type="text"
          className=" form-comtrol mb-2"
@@ -111,7 +126,7 @@ const editTask =(theTask)=>{
          onChange={(Text)=> settask(Text.target.value)}
          value={task}
          />
-         <button className = { edidMode ? "btn btn-warning btn-block" : "btn btn-dark btn-block"}
+          <button className = { edidMode ? "btn btn-warning btn-block" : "btn btn-dark btn-block"}
          type="submit">
            { edidMode ? "save" : "add" }
            </button>
